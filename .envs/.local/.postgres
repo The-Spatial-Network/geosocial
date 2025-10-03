@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=geosocial
+POSTGRES_USER=kcmdYqREtwiDGWHrCbvQlqYcaPIJVRhW
+POSTGRES_PASSWORD=FK8m5li8ZJaRFZ1Gn5OVz1lwQqwcApthFPkwJb8tSekVXIXuK2CS4itsSdGJ0B9b
