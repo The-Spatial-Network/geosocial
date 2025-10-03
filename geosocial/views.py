@@ -8,34 +8,8 @@ from geosocial.maps.models import Map
 
 
 class HomeView(TemplateView):
-    """Home page view that displays user's maps."""
-    template_name = "pages/home.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        if self.request.user.is_authenticated:
-            # Get maps owned by the user
-            owned_maps = Map.objects.filter(owner=self.request.user).select_related('owner')
-            
-            # Get maps shared with the user (as collaborator)
-            shared_maps = Map.objects.filter(
-                collaborators__user=self.request.user
-            ).select_related('owner').distinct()
-            
-            context.update({
-                'owned_maps': owned_maps,
-                'shared_maps': shared_maps,
-                'total_maps': owned_maps.count() + shared_maps.count(),
-            })
-        else:
-            context.update({
-                'owned_maps': [],
-                'shared_maps': [],
-                'total_maps': 0,
-            })
-        
-        return context
+    """React SPA view - serves the React application for all frontend routes."""
+    template_name = "react_app.html"
 
 
 # Function-based view alternative for simpler cases

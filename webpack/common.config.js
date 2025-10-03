@@ -6,8 +6,7 @@ module.exports = {
   target: 'web',
   context: path.join(__dirname, '../'),
   entry: {
-    project: path.resolve(__dirname, '../geosocial/static/js/project'),
-    vendors: path.resolve(__dirname, '../geosocial/static/js/vendors'),
+    app: path.resolve(__dirname, '../frontend/src/index.js'),
   },
   output: {
     path: path.resolve(
@@ -30,6 +29,7 @@ module.exports = {
       // we pass the output from babel loader to react-hot loader
       {
         test: /\.js$/,
+        exclude: /node_modules/,
         loader: 'babel-loader',
       },
       {

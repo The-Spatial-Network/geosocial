@@ -10,21 +10,13 @@ from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
 from geosocial.views import HomeView
+from config.auth_views import CustomObtainAuthToken
 
 urlpatterns = [
-    path("", HomeView.as_view(), name="home"),
-    path(
-        "about/",
-        TemplateView.as_view(template_name="pages/about.html"),
-        name="about",
-    ),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
-    # User management
-    path("users/", include("geosocial.users.urls", namespace="users")),
+    # User management (for Django allauth backend)
     path("accounts/", include("allauth.urls")),
-    # Your stuff: custom urls includes go here
-    path("maps/", include("geosocial.maps.urls", namespace="maps")),
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
@@ -34,11 +26,10 @@ urlpatterns = [
 urlpatterns += [
     # API base url
     path("api/", include("config.api_router")),
-    # DRF auth token
-    path("api/auth-token/", obtain_auth_token, name="obtain_auth_token"),
+    # DRF auth token (CSRF exempt)
+    path("api/auth-token/", CustomObtainAuthToken.as_view(), name="obtain_auth_token"),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
-    path(
-        "api/docs/",
+    path("api/docs/",
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
@@ -72,3 +63,9 @@ if settings.DEBUG:
             path("__debug__/", include(debug_toolbar.urls)),
             *urlpatterns,
         ]
+
+# React SPA - catch all other routes and serve the React app
+# This must be last to catch all non-API routes
+urlpatterns += [
+    path("", HomeView.as_view(), name="react-app"),
+]
