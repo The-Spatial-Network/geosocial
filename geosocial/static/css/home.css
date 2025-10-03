@@ -1,0 +1,231 @@
+/* Home page specific styles */
+.home-container {
+  padding: 2rem 0;
+}
+
+.map-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.map-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #007bff;
+}
+
+.map-card-title {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.map-card-title a {
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.map-card-title a:hover {
+  color: #007bff;
+}
+
+.map-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.map-stat-item {
+  font-size: 0.875rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.map-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Summary Cards */
+.summary-card {
+  background: linear-gradient(135deg, var(--bs-primary), #667eea);
+  border: none;
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+
+.summary-card.owned {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.summary-card.shared {
+  background: linear-gradient(135deg, #17a2b8, #6f42c1);
+}
+
+.summary-card h5 {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}
+
+.summary-card h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Welcome Section */
+.welcome-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.welcome-hero h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.welcome-hero .lead {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+/* Features Section */
+.features-section {
+  padding: 3rem 0;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.feature-item i {
+  margin-bottom: 1rem;
+}
+
+.feature-item h4 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.feature-item p {
+  color: #6c757d;
+  line-height: 1.6;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-state i {
+  color: #dee2e6;
+  margin-bottom: 2rem;
+}
+
+.empty-state h3 {
+  color: #495057;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: #6c757d;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+/* Map Style Badges */
+.badge.bg-satellite { 
+  background-color: #28a745 !important; 
+}
+
+.badge.bg-street { 
+  background-color: #007bff !important; 
+}
+
+.badge.bg-3d { 
+  background-color: #dc3545 !important; 
+}
+
+.badge.bg-gps { 
+  background-color: #ffc107 !important; 
+  color: #212529 !important; 
+}
+
+/* Button Enhancements */
+.btn-group .btn {
+  flex: 1;
+}
+
+.create-map-btn {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.create-map-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .welcome-hero {
+    padding: 2rem 1rem;
+  }
+  
+  .welcome-hero h1 {
+    font-size: 2rem;
+  }
+  
+  .summary-card h2 {
+    font-size: 2rem;
+  }
+  
+  .feature-item {
+    padding: 1.5rem 0.5rem;
+  }
+}
+
+/* Animation for loading cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.map-card {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.map-card:nth-child(1) { animation-delay: 0.1s; }
+.map-card:nth-child(2) { animation-delay: 0.2s; }
+.map-card:nth-child(3) { animation-delay: 0.3s; }
+.map-card:nth-child(4) { animation-delay: 0.4s; }
+.map-card:nth-child(5) { animation-delay: 0.5s; }
+.map-card:nth-child(6) { animation-delay: 0.6s; }

@@ -1,3 +1,227 @@
 {% extends "base.html" %}
+{% load static i18n %}
 
+{% block title %}{% translate "Home" %} - {{ block.super }}{% endblock title %}
 
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>{% translate "My Maps" %}</h1>
+      {% if user.is_authenticated %}
+        <a href="{% url 'maps:create' %}" class="btn btn-primary create-map-btn">
+          <i class="fas fa-plus"></i> {% translate "Create New Map" %}
+        </a>
+      {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+      {% if total_maps > 0 %}
+        <!-- Maps Summary -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="card summary-card">
+              <div class="card-body">
+                <h5>{% translate "Total Maps" %}</h5>
+                <h2>{{ total_maps }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card summary-card owned">
+              <div class="card-body">
+                <h5>{% translate "Owned" %}</h5>
+                <h2>{{ owned_maps.count }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card summary-card shared">
+              <div class="card-body">
+                <h5>{% translate "Shared with me" %}</h5>
+                <h2>{{ shared_maps.count }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Owned Maps Section -->
+        {% if owned_maps %}
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3 class="mb-0">{% translate "My Maps" %}</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                {% for map in owned_maps %}
+                  <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100 map-card">
+                      <div class="card-body">
+                        <h5 class="map-card-title">
+                          <a href="{% url 'maps:detail' map.pk %}">{{ map.name }}</a>
+                        </h5>
+                        <p class="card-text text-muted">{{ map.description|truncatewords:15 }}</p>
+                        
+                        <div class="map-stats">
+                          <div class="map-stat-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ map.created_at|date:"M d, Y" }}</span>
+                          </div>
+                          <div class="map-stat-item">
+                            <i class="fas fa-map-pin"></i>
+                            <span>{{ map.pins.count }} {% translate "pins" %}</span>
+                          </div>
+                          {% if map.collaborators.exists %}
+                            <div class="map-stat-item">
+                              <i class="fas fa-users"></i>
+                              <span>{{ map.collaborators.count }} {% translate "collaborator" %}{{ map.collaborators.count|pluralize }}</span>
+                            </div>
+                          {% endif %}
+                        </div>
+                        
+                        <div class="map-badges">
+                          <span class="badge bg-{{ map.style|default:'secondary' }}">{{ map.get_style_display }}</span>
+                          {% if map.public_view %}
+                            <span class="badge bg-success">{% translate "Public" %}</span>
+                          {% else %}
+                            <span class="badge bg-secondary">{% translate "Private" %}</span>
+                          {% endif %}
+                          {% if map.public_contribution %}
+                            <span class="badge bg-info">{% translate "Open Contribution" %}</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100" role="group">
+                          <a href="{% url 'maps:detail' map.pk %}" class="btn btn-sm btn-outline-primary">{% translate "View" %}</a>
+                          <a href="{% url 'maps:edit' map.pk %}" class="btn btn-sm btn-outline-secondary">{% translate "Edit" %}</a>
+                          <a href="{% url 'maps:share' map.pk %}" class="btn btn-sm btn-outline-info">{% translate "Share" %}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Shared Maps Section -->
+        {% if shared_maps %}
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0">{% translate "Shared with Me" %}</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                {% for map in shared_maps %}
+                  <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100 map-card">
+                      <div class="card-body">
+                        <h5 class="card-title">
+                          <a href="{% url 'maps:detail' map.pk %}" class="text-decoration-none">{{ map.name }}</a>
+                        </h5>
+                        <p class="card-text text-muted">{{ map.description|truncatewords:15 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <small class="text-muted">
+                            <i class="fas fa-user"></i> {% translate "by" %} {{ map.owner.get_full_name|default:map.owner.username }}
+                          </small>
+                          <span class="badge bg-{{ map.style|default:'secondary' }}">{{ map.get_style_display }}</span>
+                        </div>
+                        <div class="mt-2">
+                          <small class="text-muted">
+                            <i class="fas fa-calendar"></i> {{ map.created_at|date:"M d, Y" }}
+                          </small>
+                          <small class="text-muted ms-2">
+                            <i class="fas fa-map-pin"></i> {{ map.pins.count }} {% translate "pins" %}
+                          </small>
+                        </div>
+                        <div class="mt-2">
+                          {% if map.public_view %}
+                            <span class="badge bg-success">{% translate "Public" %}</span>
+                          {% else %}
+                            <span class="badge bg-secondary">{% translate "Private" %}</span>
+                          {% endif %}
+                          {% if map.public_contribution %}
+                            <span class="badge bg-info">{% translate "Open Contribution" %}</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100" role="group">
+                          <a href="{% url 'maps:detail' map.pk %}" class="btn btn-sm btn-outline-primary">{% translate "View" %}</a>
+                          <a href="{% url 'maps:detail' map.pk %}" class="btn btn-sm btn-outline-secondary">{% translate "Contribute" %}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+          <i class="fas fa-map fa-5x"></i>
+          <h3>{% translate "No Maps Yet" %}</h3>
+          <p>{% translate "Start creating your first map to share your story with the world." %}</p>
+          <a href="{% url 'maps:create' %}" class="btn btn-primary btn-lg create-map-btn">
+            <i class="fas fa-plus"></i> {% translate "Create Your First Map" %}
+          </a>
+        </div>
+      {% endif %}
+
+    {% else %}
+      <!-- Not authenticated -->
+      <div class="welcome-hero">
+        <h1>{% translate "Welcome to GeoSocial" %}</h1>
+        <p class="lead">{% translate "Map Your Story - Create and share interactive maps with your friends and community." %}</p>
+        <hr class="my-4" style="opacity: 0.3;">
+        <p>{% translate "Join GeoSocial to create beautiful interactive maps, share memories, and collaborate with others." %}</p>
+        <div class="mt-4">
+          <a class="btn btn-light btn-lg me-3" href="{% url 'account_signup' %}" role="button">
+            {% translate "Sign Up" %}
+          </a>
+          <a class="btn btn-outline-light btn-lg" href="{% url 'account_login' %}" role="button">
+            {% translate "Sign In" %}
+          </a>
+        </div>
+      </div>
+
+      <!-- Features Section -->
+      <div class="features-section">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="feature-item">
+              <i class="fas fa-map-marked-alt fa-3x text-primary"></i>
+              <h4>{% translate "Create Interactive Maps" %}</h4>
+              <p>{% translate "Design beautiful maps with custom pins, photos, and stories." %}</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="feature-item">
+              <i class="fas fa-share-alt fa-3x text-success"></i>
+              <h4>{% translate "Share & Collaborate" %}</h4>
+              <p>{% translate "Share your maps with friends or make them public for everyone to see." %}</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="feature-item">
+              <i class="fas fa-mobile-alt fa-3x text-info"></i>
+              <h4>{% translate "Mobile Friendly" %}</h4>
+              <p>{% translate "Access your maps anywhere, on any device." %}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}
+
+{% block css %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
+{% endblock css %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load static i18n crispy_forms_tags %}
+
+{% block title %}
+  {% if object %}
+    {% translate "Edit Map" %}: {{ object.name }}
+  {% else %}
+    {% translate "Create New Map" %}
+  {% endif %}
+  - {{ block.super }}
+{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="mb-0">
+          {% if object %}
+            <i class="fas fa-edit"></i> {% translate "Edit Map" %}: {{ object.name }}
+          {% else %}
+            <i class="fas fa-plus"></i> {% translate "Create New Map" %}
+          {% endif %}
+        </h3>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }} *</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.name.errors.0 }}
+              </div>
+            {% endif %}
+            {% if form.name.help_text %}
+              <div class="form-text">{{ form.name.help_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.description.errors.0 }}
+              </div>
+            {% endif %}
+            {% if form.description.help_text %}
+              <div class="form-text">{{ form.description.help_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="{{ form.style.id_for_label }}" class="form-label">{{ form.style.label }}</label>
+            {{ form.style }}
+            {% if form.style.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.style.errors.0 }}
+              </div>
+            {% endif %}
+            {% if form.style.help_text %}
+              <div class="form-text">{{ form.style.help_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <div class="form-check">
+                  {{ form.public_view }}
+                  <label class="form-check-label" for="{{ form.public_view.id_for_label }}">
+                    {{ form.public_view.label }}
+                  </label>
+                </div>
+                {% if form.public_view.help_text %}
+                  <div class="form-text">{{ form.public_view.help_text }}</div>
+                {% endif %}
+                {% if form.public_view.errors %}
+                  <div class="invalid-feedback d-block">
+                    {{ form.public_view.errors.0 }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <div class="form-check">
+                  {{ form.public_contribution }}
+                  <label class="form-check-label" for="{{ form.public_contribution.id_for_label }}">
+                    {{ form.public_contribution.label }}
+                  </label>
+                </div>
+                {% if form.public_contribution.help_text %}
+                  <div class="form-text">{{ form.public_contribution.help_text }}</div>
+                {% endif %}
+                {% if form.public_contribution.errors %}
+                  <div class="invalid-feedback d-block">
+                    {{ form.public_contribution.errors.0 }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="d-flex justify-content-between align-items-center">
+            <a href="{% if object %}{% url 'maps:detail' object.pk %}{% else %}{% url 'maps:list' %}{% endif %}" 
+               class="btn btn-outline-secondary">
+              <i class="fas fa-times"></i> {% translate "Cancel" %}
+            </a>
+            
+            <div>
+              {% if object %}
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> {% translate "Update Map" %}
+                </button>
+              {% else %}
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-plus"></i> {% translate "Create Map" %}
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Help Card -->
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-question-circle"></i> {% translate "Map Settings Help" %}</h5>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-3">{% translate "Map Style" %}</dt>
+          <dd class="col-sm-9">{% translate "Choose the visual style for your map. This affects how the map background appears." %}</dd>
+          
+          <dt class="col-sm-3">{% translate "Public View" %}</dt>
+          <dd class="col-sm-9">{% translate "When enabled, anyone with the link can view your map. When disabled, only you and your collaborators can see it." %}</dd>
+          
+          <dt class="col-sm-3">{% translate "Public Contribution" %}</dt>
+          <dd class="col-sm-9">{% translate "When enabled, anyone can add pins to your map. When disabled, only you and your collaborators can add content." %}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block css %}
+  {{ block.super }}
+  <style>
+    .form-control:focus,
+    .form-select:focus,
+    .form-check-input:focus {
+      border-color: #80bdff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .invalid-feedback {
+      font-size: 0.875em;
+    }
+    
+    .form-text {
+      font-size: 0.875em;
+      color: #6c757d;
+    }
+    
+    .card-header h3 {
+      color: #495057;
+    }
+  </style>
+{% endblock css %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add form validation feedback
+      const form = document.querySelector('form');
+      const inputs = form.querySelectorAll('input, textarea, select');
+      
+      inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+          if (this.checkValidity()) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+          } else {
+            this.classList.remove('is-valid');
+            this.classList.add('is-invalid');
+          }
+        });
+      });
+      
+      // Form submission
+      form.addEventListener('submit', function(e) {
+        let isValid = true;
+        inputs.forEach(input => {
+          if (!input.checkValidity()) {
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        });
+        
+        if (!isValid) {
+          e.preventDefault();
+          // Focus on first invalid field
+          const firstInvalid = form.querySelector('.is-invalid');
+          if (firstInvalid) {
+            firstInvalid.focus();
+          }
+        }
+      });
+    });
+  </script>
+{% endblock javascript %}

@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% translate "Share Map" %}: {{ map.name }} - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <!-- Map Info Header -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">
+            <i class="fas fa-share"></i> {% translate "Share Map" %}: {{ map.name }}
+          </h3>
+          <a href="{% url 'maps:detail' map.pk %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> {% translate "Back to Map" %}
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">{{ map.description }}</p>
+        <div class="map-badges">
+          {% if map.public_view %}
+            <span class="badge bg-success">{% translate "Public View" %}</span>
+          {% else %}
+            <span class="badge bg-secondary">{% translate "Private" %}</span>
+          {% endif %}
+          {% if map.public_contribution %}
+            <span class="badge bg-info">{% translate "Public Contribution" %}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Share Form -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-user-plus"></i> {% translate "Add Collaborator" %}</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" id="shareForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="{{ form.username_or_email.id_for_label }}" class="form-label">
+              {{ form.username_or_email.label }}
+            </label>
+            {{ form.username_or_email }}
+            {% if form.username_or_email.help_text %}
+              <div class="form-text">{{ form.username_or_email.help_text }}</div>
+            {% endif %}
+            {% if form.username_or_email.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.username_or_email.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+          
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-share"></i> {% translate "Share Map" %}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Current Collaborators -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-users"></i> {% translate "Current Collaborators" %}
+          {% if collaborators %}
+            <span class="badge bg-secondary">{{ collaborators.count }}</span>
+          {% endif %}
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if collaborators %}
+          <div class="list-group list-group-flush">
+            {% for collaborator in collaborators %}
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1">{{ collaborator.user.get_full_name|default:collaborator.user.username }}</h6>
+                  {% if collaborator.user.email %}
+                    <small class="text-muted">{{ collaborator.user.email }}</small>
+                  {% endif %}
+                  <small class="text-muted d-block">
+                    {% translate "Shared" %} {{ collaborator.created_at|timesince }} {% translate "ago" %}
+                  </small>
+                </div>
+                <div class="btn-group" role="group">
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-danger"
+                          onclick="removeCollaborator('{{ collaborator.pk }}')"
+                          title="{% translate 'Remove collaborator' %}">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-users fa-2x mb-3"></i>
+            <p>{% translate "No collaborators yet." %}</p>
+            <small>{% translate "Share your map to start collaborating with others." %}</small>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Share Options -->
+    {% if map.public_view %}
+      <div class="card mt-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-link"></i> {% translate "Public Link" %}</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">{% translate "Since this map is public, you can share this direct link:" %}</p>
+          <div class="input-group">
+            <input type="text" 
+                   class="form-control" 
+                   id="publicLink" 
+                   value="{{ request.build_absolute_uri }}" 
+                   readonly>
+            <button class="btn btn-outline-secondary" 
+                    type="button" 
+                    onclick="copyPublicLink()"
+                    title="{% translate 'Copy link' %}">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+          <small class="form-text text-muted mt-2">
+            {% translate "Anyone with this link can view your map." %}
+          </small>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Privacy Info -->
+    <div class="alert alert-info mt-4">
+      <h6><i class="fas fa-info-circle"></i> {% translate "Privacy Information" %}</h6>
+      <ul class="mb-0">
+        <li>{% translate "Collaborators can view and edit this map" %}</li>
+        <li>{% translate "Collaborators can add, edit, and remove pins" %}</li>
+        {% if not map.public_view %}
+          <li>{% translate "This map is private - only you and collaborators can see it" %}</li>
+        {% endif %}
+        {% if not map.public_contribution %}
+          <li>{% translate "Only you and collaborators can contribute to this map" %}</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block css %}
+  {{ block.super }}
+  <style>
+    .map-badges .badge {
+      margin-right: 0.5rem;
+    }
+    
+    .list-group-item:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .input-group .form-control {
+      background-color: #f8f9fa;
+    }
+    
+    .alert ul {
+      padding-left: 1.2rem;
+    }
+  </style>
+{% endblock css %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script>
+    function copyPublicLink() {
+      const linkInput = document.getElementById('publicLink');
+      linkInput.select();
+      linkInput.setSelectionRange(0, 99999); // For mobile devices
+      
+      try {
+        document.execCommand('copy');
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+          button.innerHTML = originalContent;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-secondary');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy link:', err);
+        alert('{% translate "Failed to copy link. Please copy manually." %}');
+      }
+    }
+    
+    function removeCollaborator(collaboratorId) {
+      if (confirm('{% translate "Are you sure you want to remove this collaborator?" %}')) {
+        // TODO: Implement AJAX call to remove collaborator
+        console.log('Remove collaborator:', collaboratorId);
+        // For now, show a placeholder message
+        alert('{% translate "Collaborator removal feature will be implemented." %}');
+      }
+    }
+    
+    // Handle share form submission
+    document.getElementById('shareForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      
+      fetch(this.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show success message and reload page
+          alert(data.message);
+          window.location.reload();
+        } else {
+          // Show error messages
+          if (data.errors && data.errors.username_or_email) {
+            const input = document.getElementById('{{ form.username_or_email.id_for_label }}');
+            const feedback = input.nextElementSibling;
+            if (feedback && feedback.classList.contains('invalid-feedback')) {
+              feedback.textContent = data.errors.username_or_email[0];
+              feedback.style.display = 'block';
+            } else {
+              alert(data.errors.username_or_email[0]);
+            }
+            input.classList.add('is-invalid');
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('{% translate "An error occurred. Please try again." %}');
+      });
+    });
+  </script>
+{% endblock javascript %}

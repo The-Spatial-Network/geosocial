@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% translate "My Maps" %} - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>{% translate "My Maps" %}</h1>
+      <a href="{% url 'maps:create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> {% translate "Create New Map" %}
+      </a>
+    </div>
+
+    {% if maps %}
+      <!-- Maps Summary -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5>{% translate "Owned Maps" %}</h5>
+              <h2>{{ owned_maps }}</h2>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card summary-card shared">
+            <div class="card-body">
+              <h5>{% translate "Shared with me" %}</h5>
+              <h2>{{ shared_maps }}</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maps Grid -->
+      <div class="row">
+        {% for map in maps %}
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 map-card">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <a href="{% url 'maps:detail' map.pk %}" class="text-decoration-none">{{ map.name }}</a>
+                </h5>
+                <p class="card-text text-muted">{{ map.description|truncatewords:15 }}</p>
+                
+                <div class="map-stats">
+                  <div class="map-stat-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>{{ map.created_at|date:"M d, Y" }}</span>
+                  </div>
+                  <div class="map-stat-item">
+                    <i class="fas fa-map-pin"></i>
+                    <span>{{ map.pins.count }} {% translate "pins" %}</span>
+                  </div>
+                  {% if map.collaborators.exists %}
+                    <div class="map-stat-item">
+                      <i class="fas fa-users"></i>
+                      <span>{{ map.collaborators.count }} {% translate "collaborator" %}{{ map.collaborators.count|pluralize }}</span>
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <div class="map-badges mt-2">
+                  <span class="badge bg-{{ map.style|default:'secondary' }}">{{ map.get_style_display }}</span>
+                  {% if map.public_view %}
+                    <span class="badge bg-success">{% translate "Public" %}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{% translate "Private" %}</span>
+                  {% endif %}
+                  {% if map.public_contribution %}
+                    <span class="badge bg-info">{% translate "Open Contribution" %}</span>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="card-footer bg-transparent">
+                <div class="btn-group w-100" role="group">
+                  <a href="{% url 'maps:detail' map.pk %}" class="btn btn-sm btn-outline-primary">{% translate "View" %}</a>
+                  {% if map.owner == request.user or map.collaborators.filter(user=request.user).exists %}
+                    <a href="{% url 'maps:edit' map.pk %}" class="btn btn-sm btn-outline-secondary">{% translate "Edit" %}</a>
+                  {% endif %}
+                  {% if map.owner == request.user %}
+                    <a href="{% url 'maps:share' map.pk %}" class="btn btn-sm btn-outline-info">{% translate "Share" %}</a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if is_paginated %}
+        <nav aria-label="{% translate 'Maps pagination' %}">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1">{% translate "First" %}</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% translate "Previous" %}</a>
+              </li>
+            {% endif %}
+            
+            <li class="page-item active">
+              <span class="page-link">{{ page_obj.number }} {% translate "of" %} {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% translate "Next" %}</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{% translate "Last" %}</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <!-- Empty State -->
+      <div class="empty-state text-center py-5">
+        <i class="fas fa-map fa-5x text-muted mb-3"></i>
+        <h3>{% translate "No Maps Yet" %}</h3>
+        <p class="text-muted">{% translate "Start creating your first map to share your story with the world." %}</p>
+        <a href="{% url 'maps:create' %}" class="btn btn-primary btn-lg">
+          <i class="fas fa-plus"></i> {% translate "Create Your First Map" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}
+
+{% block css %}
+  {{ block.super }}
+  <style>
+    .map-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .map-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .map-stat-item {
+      display: inline-block;
+      margin-right: 15px;
+      margin-bottom: 5px;
+      font-size: 0.85em;
+      color: #6c757d;
+    }
+    
+    .map-stat-item i {
+      margin-right: 4px;
+    }
+    
+    .summary-card {
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+    
+    .summary-card.shared {
+      border-left: 4px solid #17a2b8;
+    }
+    
+    .summary-card h2 {
+      color: #495057;
+      font-weight: bold;
+    }
+    
+    .empty-state {
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+{% endblock css %}

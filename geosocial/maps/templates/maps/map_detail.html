@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ map.name }} - {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <!-- Map Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <h1>{{ map.name }}</h1>
+        <p class="text-muted mb-2">{{ map.description }}</p>
+        <div class="map-meta">
+          <span class="badge bg-{{ map.style|default:'secondary' }}">{{ map.get_style_display }}</span>
+          {% if map.public_view %}
+            <span class="badge bg-success">{% translate "Public" %}</span>
+          {% else %}
+            <span class="badge bg-secondary">{% translate "Private" %}</span>
+          {% endif %}
+          {% if map.public_contribution %}
+            <span class="badge bg-info">{% translate "Open Contribution" %}</span>
+          {% endif %}
+          
+          <small class="text-muted ms-3">
+            <i class="fas fa-user"></i> {% translate "by" %} {{ map.owner.get_full_name|default:map.owner.username }}
+          </small>
+          <small class="text-muted ms-2">
+            <i class="fas fa-calendar"></i> {{ map.created_at|date:"M d, Y" }}
+          </small>
+        </div>
+      </div>
+      
+      <div class="btn-group" role="group">
+        {% if can_edit %}
+          <a href="{% url 'maps:edit' map.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-edit"></i> {% translate "Edit" %}
+          </a>
+        {% endif %}
+        {% if map.owner == request.user %}
+          <a href="{% url 'maps:share' map.pk %}" class="btn btn-outline-info">
+            <i class="fas fa-share"></i> {% translate "Share" %}
+          </a>
+        {% endif %}
+        <a href="{% url 'maps:list' %}" class="btn btn-outline-primary">
+          <i class="fas fa-list"></i> {% translate "All Maps" %}
+        </a>
+      </div>
+    </div>
+
+    <!-- Map Display Area -->
+    <div class="card mb-4">
+      <div class="card-body p-0">
+        <div id="map-container" style="height: 500px; background: #f8f9fa;">
+          <!-- Interactive map will be loaded here -->
+          <div class="d-flex align-items-center justify-content-center h-100">
+            <div class="text-center text-muted">
+              <i class="fas fa-map fa-3x mb-3"></i>
+              <h5>{% translate "Interactive Map" %}</h5>
+              <p>{% translate "Map viewer will be loaded here" %}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Map Pins List -->
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="fas fa-map-pin"></i> {% translate "Map Pins" %} 
+              <span class="badge bg-secondary">{{ map.pins.count }}</span>
+            </h5>
+            {% if can_contribute %}
+              <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addPinModal">
+                <i class="fas fa-plus"></i> {% translate "Add Pin" %}
+              </button>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            {% if map.pins.exists %}
+              <div class="list-group list-group-flush">
+                {% for pin in map.pins.all %}
+                  <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                      <h6 class="mb-1">
+                        <i class="fas fa-{{ pin.icon }}"></i> {{ pin.name }}
+                      </h6>
+                      <small class="text-muted">{{ pin.timestamp|timesince }} {% translate "ago" %}</small>
+                    </div>
+                    {% if pin.description %}
+                      <p class="mb-1">{{ pin.description }}</p>
+                    {% endif %}
+                    <small class="text-muted">
+                      <i class="fas fa-user"></i> {{ pin.placed_by.get_full_name|default:pin.placed_by.username }}
+                      <span class="ms-3">
+                        <i class="fas fa-map-marker-alt"></i> {{ pin.latitude }}, {{ pin.longitude }}
+                      </span>
+                      {% if pin.content_url %}
+                        <a href="{{ pin.content_url }}" target="_blank" class="ms-3 text-decoration-none">
+                          <i class="fas fa-external-link-alt"></i> {% translate "View Content" %}
+                        </a>
+                      {% endif %}
+                    </small>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="text-center text-muted py-4">
+                <i class="fas fa-map-pin fa-2x mb-3"></i>
+                <p>{% translate "No pins added yet." %}</p>
+                {% if can_contribute %}
+                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPinModal">
+                    <i class="fas fa-plus"></i> {% translate "Add First Pin" %}
+                  </button>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Info Sidebar -->
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-info-circle"></i> {% translate "Map Information" %}</h5>
+          </div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-5">{% translate "Style" %}</dt>
+              <dd class="col-sm-7">{{ map.get_style_display }}</dd>
+              
+              <dt class="col-sm-5">{% translate "Owner" %}</dt>
+              <dd class="col-sm-7">{{ map.owner.get_full_name|default:map.owner.username }}</dd>
+              
+              <dt class="col-sm-5">{% translate "Created" %}</dt>
+              <dd class="col-sm-7">{{ map.created_at|date:"F d, Y" }}</dd>
+              
+              <dt class="col-sm-5">{% translate "Updated" %}</dt>
+              <dd class="col-sm-7">{{ map.updated_at|date:"F d, Y" }}</dd>
+              
+              <dt class="col-sm-5">{% translate "Pins" %}</dt>
+              <dd class="col-sm-7">{{ map.pins.count }}</dd>
+            </dl>
+          </div>
+        </div>
+
+        {% if map.collaborators.exists %}
+          <div class="card mt-3">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="fas fa-users"></i> {% translate "Collaborators" %}</h5>
+            </div>
+            <div class="card-body">
+              {% for collaborator in map.collaborators.all %}
+                <div class="d-flex align-items-center mb-2">
+                  <div class="flex-grow-1">
+                    <strong>{{ collaborator.user.get_full_name|default:collaborator.user.username }}</strong>
+                    <small class="text-muted d-block">{% translate "Since" %} {{ collaborator.created_at|date:"M d, Y" }}</small>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Pin Modal -->
+{% if can_contribute and pin_form %}
+  <div class="modal fade" id="addPinModal" tabindex="-1" aria-labelledby="addPinModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addPinModalLabel">{% translate "Add New Pin" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="post" action="#" id="addPinForm">
+          <div class="modal-body">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="{{ pin_form.name.id_for_label }}" class="form-label">{{ pin_form.name.label }}</label>
+              {{ pin_form.name }}
+            </div>
+            <div class="mb-3">
+              <label for="{{ pin_form.description.id_for_label }}" class="form-label">{{ pin_form.description.label }}</label>
+              {{ pin_form.description }}
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ pin_form.latitude.id_for_label }}" class="form-label">{{ pin_form.latitude.label }}</label>
+                {{ pin_form.latitude }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ pin_form.longitude.id_for_label }}" class="form-label">{{ pin_form.longitude.label }}</label>
+                {{ pin_form.longitude }}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="{{ pin_form.content_url.id_for_label }}" class="form-label">{{ pin_form.content_url.label }}</label>
+              {{ pin_form.content_url }}
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="{{ pin_form.content_type.id_for_label }}" class="form-label">{{ pin_form.content_type.label }}</label>
+                {{ pin_form.content_type }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="{{ pin_form.icon.id_for_label }}" class="form-label">{{ pin_form.icon.label }}</label>
+                {{ pin_form.icon }}
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
+            <button type="submit" class="btn btn-primary">{% translate "Add Pin" %}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock content %}
+
+{% block css %}
+  {{ block.super }}
+  <style>
+    .map-meta .badge {
+      margin-right: 0.5rem;
+    }
+    
+    #map-container {
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+    }
+    
+    .list-group-item:hover {
+      background-color: #f8f9fa;
+    }
+  </style>
+{% endblock css %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle add pin form submission
+      const addPinForm = document.getElementById('addPinForm');
+      if (addPinForm) {
+        addPinForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          // TODO: Implement AJAX submission for adding pins
+          console.log('Pin form submitted');
+        });
+      }
+    });
+  </script>
+{% endblock javascript %}
