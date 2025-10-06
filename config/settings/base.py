@@ -78,8 +78,11 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.mfa",
     "allauth.socialaccount",
+    "allauth.headless",
     "rest_framework",
     "rest_framework.authtoken",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
     "corsheaders",
     "drf_spectacular",
     "webpack_loader",
@@ -215,7 +218,12 @@ FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 # https://docs.djangoproject.com/en/dev/ref/settings/#session-cookie-httponly
 SESSION_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
-CSRF_COOKIE_HTTPONLY = True
+# Allow JavaScript access to CSRF cookie for SPA integration
+CSRF_COOKIE_HTTPONLY = False
+# https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-name
+CSRF_COOKIE_NAME = 'csrftoken'
+# https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-samesite
+CSRF_COOKIE_SAMESITE = 'Lax'
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = "DENY"
 
@@ -286,6 +294,17 @@ SOCIALACCOUNT_ADAPTER = "geosocial.users.adapters.SocialAccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_FORMS = {"signup": "geosocial.users.forms.UserSocialSignupForm"}
 
+# Headless mode for SPA integration
+# https://docs.allauth.org/en/latest/headless/index.html
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": "/auth/verify-email/{key}",
+    "account_reset_password": "/auth/password/reset",
+    "account_reset_password_from_key": "/auth/password/reset/key/{key}",
+    "account_signup": "/auth/signup",
+    "socialaccount_login_error": "/auth/error",
+}
+HEADLESS_ONLY = True
+
 # django-rest-framework
 # -------------------------------------------------------------------------------
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
@@ -296,6 +315,14 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# dj-rest-auth
+# -------------------------------------------------------------------------------
+REST_AUTH = {
+    "USE_JWT": False,  # We'll use token auth for now
+    "SESSION_LOGIN": True,
+    "USER_DETAILS_SERIALIZER": "geosocial.users.api.serializers.UserSerializer",
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Container, Grid, Card, Header, Message, Label, Segment, List } from 'semantic-ui-react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { mapsAPI } from '../api';
@@ -24,89 +24,100 @@ function MapDetailPage() {
   if (error) {
     return (
       <Container>
-        <div className="alert alert-danger">
-          Error loading map: {error.message}
-        </div>
+        <Message negative>
+          <Message.Header>Error loading map</Message.Header>
+          <p>{error.message}</p>
+        </Message>
       </Container>
     );
   }
 
   return (
     <Container fluid>
-      <Row>
-        <Col lg={3} className="mb-4">
-          <Card>
-            <Card.Header>
-              <h4>{map.name}</h4>
-            </Card.Header>
-            <Card.Body>
-              <p className="text-muted">{map.description}</p>
-              
-              <div className="mb-3">
-                <strong>Owner:</strong> {map.owner}
-              </div>
-              
-              <div className="mb-3">
-                <strong>Style:</strong> {map.style}
-              </div>
-              
-              <div className="mb-3">
-                <strong>Pins:</strong> {map.pins_count}
-              </div>
-              
-              <div className="mb-3">
-                <strong>Collaborators:</strong> {map.collaborators_count}
-              </div>
+      <Grid>
+        <Grid.Column width={4}>
+          <Card fluid>
+            <Card.Content>
+              <Card.Header>{map.name}</Card.Header>
+              <Card.Description>{map.description}</Card.Description>
+            </Card.Content>
+            <Card.Content extra>
+              <List divided relaxed>
+                <List.Item>
+                  <List.Content>
+                    <List.Header>Owner</List.Header>
+                    {map.owner}
+                  </List.Content>
+                </List.Item>
+                <List.Item>
+                  <List.Content>
+                    <List.Header>Style</List.Header>
+                    {map.style}
+                  </List.Content>
+                </List.Item>
+                <List.Item>
+                  <List.Content>
+                    <List.Header>Pins</List.Header>
+                    {map.pins_count}
+                  </List.Content>
+                </List.Item>
+                <List.Item>
+                  <List.Content>
+                    <List.Header>Collaborators</List.Header>
+                    {map.collaborators_count}
+                  </List.Content>
+                </List.Item>
+              </List>
               
               {map.public_view && (
-                <span className="badge bg-success">Public</span>
+                <Label color="green">Public</Label>
               )}
-            </Card.Body>
+            </Card.Content>
           </Card>
 
           {/* Pins List */}
           {map.pins && map.pins.length > 0 && (
-            <Card className="mt-3">
-              <Card.Header>
-                <h5>Pins ({map.pins.length})</h5>
-              </Card.Header>
-              <Card.Body style={{maxHeight: '400px', overflowY: 'auto'}}>
-                {map.pins.map((pin) => (
-                  <div key={pin.id} className="border-bottom pb-2 mb-2">
-                    <h6>{pin.name}</h6>
-                    <p className="small text-muted mb-1">{pin.description}</p>
-                    <small className="text-muted">
-                      By {pin.placed_by} • {pin.content_type}
-                    </small>
-                  </div>
-                ))}
-              </Card.Body>
+            <Card fluid style={{ marginTop: '1rem' }}>
+              <Card.Content>
+                <Card.Header>Pins ({map.pins.length})</Card.Header>
+              </Card.Content>
+              <Card.Content style={{maxHeight: '400px', overflowY: 'auto'}}>
+                <List divided>
+                  {map.pins.map((pin) => (
+                    <List.Item key={pin.id}>
+                      <List.Content>
+                        <List.Header>{pin.name}</List.Header>
+                        <List.Description>{pin.description}</List.Description>
+                        <div style={{ fontSize: '0.9em', color: '#999', marginTop: '0.5rem' }}>
+                          By {pin.placed_by} • {pin.content_type}
+                        </div>
+                      </List.Content>
+                    </List.Item>
+                  ))}
+                </List>
+              </Card.Content>
             </Card>
           )}
-        </Col>
+        </Grid.Column>
         
-        <Col lg={9}>
+        <Grid.Column width={12}>
           {/* Map Component Placeholder */}
-          <Card style={{height: '600px'}}>
-            <Card.Body className="d-flex align-items-center justify-content-center">
-              <div className="text-center">
-                <h4>Interactive Map</h4>
-                <p className="text-muted">
-                  Map component will be implemented here using React Leaflet
-                </p>
-                <p className="text-muted">
-                  Latitude/Longitude coordinates will be displayed for pins:
-                </p>
+          <Card fluid style={{height: '600px'}}>
+            <Card.Content style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+              <Segment placeholder textAlign="center">
+                <Header as="h4">Interactive Map</Header>
+                <p>Map component will be implemented here using React Leaflet</p>
+                <p>Latitude/Longitude coordinates will be displayed for pins:</p>
                 {map.pins && map.pins.map((pin) => (
-                  <div key={pin.id} className="small">
+                  <div key={pin.id} style={{ fontSize: '0.9em', margin: '0.5rem 0' }}>
                     {pin.name}: {pin.latitude}, {pin.longitude}
                   </div>
                 ))}
-              </div>
-            </Card.Body>
+              </Segment>
+            </Card.Content>
           </Card>
-        </Col>
-      </Row>
+        </Grid.Column>
+      </Grid>
     </Container>
   );
 }

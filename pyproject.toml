@@ -176,6 +176,7 @@ dependencies = [
     "django-redis==6.0.0",
     "django-webpack-loader==3.2.1",
     "djangorestframework==3.16.1",
+    "dj-rest-auth==6.0.0",
     "drf-spectacular==0.28.0",
     "gunicorn==23.0.0",
     "hiredis==3.2.1",

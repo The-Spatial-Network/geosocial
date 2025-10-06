@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navbar, Nav, Container, Button } from 'react-bootstrap';
+import { Menu, Container, Button } from 'semantic-ui-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
@@ -7,52 +7,57 @@ function Navigation() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
   return (
-    <Navbar bg="primary" variant="dark" expand="lg">
+    <Menu inverted color="blue" size="large">
       <Container>
-        <Navbar.Brand as={Link} to="/">
+        <Menu.Item as={Link} to="/" header>
           GeoSocial
-        </Navbar.Brand>
+        </Menu.Item>
         
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">
-              Home
-            </Nav.Link>
-            {user && (
-              <>
-                <Nav.Link as={Link} to="/maps">
-                  My Maps
-                </Nav.Link>
-              </>
-            )}
-          </Nav>
-          
-          <Nav>
-            {user ? (
-              <>
-                <Nav.Link as={Link} to="/profile">
-                  {user.username}
-                </Nav.Link>
-                <Button variant="outline-light" onClick={handleLogout}>
+        <Menu.Item as={Link} to="/">
+          Home
+        </Menu.Item>
+        
+        {user && (
+          <Menu.Item as={Link} to="/maps">
+            My Maps
+          </Menu.Item>
+        )}
+        
+        <Menu.Menu position="right">
+          {user ? (
+            <>
+              <Menu.Item as={Link} to="/profile">
+                {user.username}
+              </Menu.Item>
+              <Menu.Item>
+                <Button 
+                  basic 
+                  inverted
+                  onClick={handleLogout}
+                >
                   Logout
                 </Button>
-              </>
-            ) : (
-              <Nav.Link as={Link} to="/login">
+              </Menu.Item>
+            </>
+          ) : (
+            <>
+              <Menu.Item as={Link} to="/login">
                 Login
-              </Nav.Link>
-            )}
-          </Nav>
-        </Navbar.Collapse>
+              </Menu.Item>
+              <Menu.Item as={Link} to="/signup">
+                Sign Up
+              </Menu.Item>
+            </>
+          )}
+        </Menu.Menu>
       </Container>
-    </Navbar>
+    </Menu>
   );
 }
 

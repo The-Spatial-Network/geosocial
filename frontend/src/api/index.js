@@ -1,14 +1,49 @@
+import axios from 'axios';
 import apiClient from './client';
 
-// Auth API
+// Auth API using dj-rest-auth for clean REST authentication
 export const authAPI = {
+  // Login using dj-rest-auth
   login: async (credentials) => {
-    const response = await apiClient.post('auth-token/', credentials);
+    const response = await apiClient.post('auth/login/', {
+      username: credentials.username,
+      password: credentials.password,
+    });
     return response.data;
   },
   
+  // Signup using dj-rest-auth
+  signup: async (userData) => {
+    const response = await apiClient.post('auth/registration/', {
+      username: userData.username,
+      email: userData.email,
+      password1: userData.password1,
+      password2: userData.password2,
+    });
+    return response.data;
+  },
+  
+  // Get current user from dj-rest-auth
   getCurrentUser: async () => {
-    const response = await apiClient.get('users/me/');
+    const response = await apiClient.get('auth/user/');
+    return response.data;
+  },
+  
+  // Logout using dj-rest-auth
+  logout: async () => {
+    const response = await apiClient.post('auth/logout/');
+    return response.data;
+  },
+  
+  // Password change
+  changePassword: async (passwords) => {
+    const response = await apiClient.post('auth/password/change/', passwords);
+    return response.data;
+  },
+  
+  // Password reset
+  resetPassword: async (email) => {
+    const response = await apiClient.post('auth/password/reset/', { email });
     return response.data;
   },
 };

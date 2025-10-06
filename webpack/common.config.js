@@ -33,7 +33,22 @@ module.exports = {
         loader: 'babel-loader',
       },
       {
-        test: /\.s?css$/i,
+        test: /\.css$/i,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: ['postcss-preset-env', 'autoprefixer', 'pixrem'],
+              },
+            },
+          },
+        ],
+      },
+      {
+        test: /\.scss$/i,
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',

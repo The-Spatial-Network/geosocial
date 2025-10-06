@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
+import { Container, Grid, Card, Button, Label, Header, Message, Segment } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { mapsAPI } from '../api';
@@ -29,90 +29,90 @@ function MapsPage() {
   }
 
   const MapCard = ({ map, showOwner = false }) => (
-    <Col md={6} lg={4} className="mb-4" key={map.id}>
-      <Card className="h-100">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-start mb-2">
-            <h5 className="card-title">{map.name}</h5>
-            {map.public_view && <Badge bg="success">Public</Badge>}
-          </div>
+    <Grid.Column key={map.id}>
+      <Card fluid>
+        <Card.Content>
+          <Card.Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            {map.name}
+            {map.public_view && <Label color="green" size="mini">Public</Label>}
+          </Card.Header>
           
           {showOwner && (
-            <p className="text-muted small mb-2">By {map.owner}</p>
+            <Card.Meta>By {map.owner}</Card.Meta>
           )}
           
-          <p className="card-text text-muted">
-            {map.description.length > 100 
+          <Card.Description>
+            {map.description && map.description.length > 100 
               ? `${map.description.substring(0, 100)}...`
               : map.description}
-          </p>
-          
-          <div className="d-flex justify-content-between align-items-center">
-            <small className="text-muted">
+          </Card.Description>
+        </Card.Content>
+        
+        <Card.Content extra>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ color: '#999', fontSize: '0.9em' }}>
               {map.pins_count} pins • {map.collaborators_count} collaborators
-            </small>
-            <Button as={Link} to={`/maps/${map.slug}`} variant="outline-primary" size="sm">
+            </div>
+            <Button as={Link} to={`/maps/${map.slug}`} color="blue" size="small">
               View Map
             </Button>
           </div>
-        </Card.Body>
+        </Card.Content>
       </Card>
-    </Col>
+    </Grid.Column>
   );
 
   return (
     <Container>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Maps</h1>
-        <Button variant="primary">Create New Map</Button>
-      </div>
+      <Segment style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Header as="h1">Maps</Header>
+        <Button color="blue">Create New Map</Button>
+      </Segment>
 
       {/* My Maps Section */}
-      <section className="mb-5">
-        <h2>My Maps</h2>
+      <Segment style={{ marginBottom: '2rem' }}>
+        <Header as="h2">My Maps</Header>
         {myMapsError ? (
-          <div className="alert alert-danger">
-            Error loading your maps: {myMapsError.message}
-          </div>
+          <Message negative>
+            <Message.Header>Error loading your maps</Message.Header>
+            <p>{myMapsError.message}</p>
+          </Message>
         ) : myMaps.length === 0 ? (
-          <Card>
-            <Card.Body className="text-center py-5">
-              <h4>No maps yet</h4>
-              <p className="text-muted">Create your first map to get started!</p>
-              <Button variant="primary">Create Your First Map</Button>
-            </Card.Body>
-          </Card>
+          <Segment placeholder textAlign="center">
+            <Header as="h4">No maps yet</Header>
+            <p>Create your first map to get started!</p>
+            <Button color="blue">Create Your First Map</Button>
+          </Segment>
         ) : (
-          <Row>
+          <Grid stackable columns={3}>
             {myMaps.map((map) => (
               <MapCard key={map.id} map={map} />
             ))}
-          </Row>
+          </Grid>
         )}
-      </section>
+      </Segment>
 
       {/* Public Maps Section */}
-      <section>
-        <h2>Public Maps</h2>
+      <Segment>
+        <Header as="h2">Public Maps</Header>
         {publicMapsError ? (
-          <div className="alert alert-danger">
-            Error loading public maps: {publicMapsError.message}
-          </div>
+          <Message negative>
+            <Message.Header>Error loading public maps</Message.Header>
+            <p>{publicMapsError.message}</p>
+          </Message>
         ) : publicMaps.length === 0 ? (
-          <Card>
-            <Card.Body className="text-center py-5">
-              <h4>No public maps available</h4>
-              <p className="text-muted">Be the first to create a public map!</p>
-            </Card.Body>
-          </Card>
+          <Segment placeholder textAlign="center">
+            <Header as="h4">No public maps available</Header>
+            <p>Be the first to create a public map!</p>
+          </Segment>
         ) : (
-          <Row>
+          <Grid stackable columns={3}>
             {publicMaps.map((map) => (
               <MapCard key={map.id} map={map} showOwner={true} />
             ))}
-          </Row>
+          </Grid>
         )}
-      </section>
+      </Segment>
     </Container>
   );
 }

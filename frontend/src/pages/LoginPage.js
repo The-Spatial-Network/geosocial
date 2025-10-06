@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Grid, Segment, Form, Button, Message, Header, Container } from 'semantic-ui-react';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 function LoginPage() {
@@ -18,10 +18,10 @@ function LoginPage() {
     return <Navigate to="/maps" />;
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e, { name, value }) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
   };
 
@@ -43,63 +43,60 @@ function LoginPage() {
 
   return (
     <Container>
-      <Row className="justify-content-center">
-        <Col md={6} lg={4}>
-          <Card>
-            <Card.Header>
-              <h3 className="text-center mb-0">Login</h3>
-            </Card.Header>
-            <Card.Body>
-              {error && (
-                <Alert variant="danger">{error}</Alert>
-              )}
+      <Grid centered columns={2}>
+        <Grid.Column>
+          <Segment padded>
+            <Header as="h2" textAlign="center" color="blue">
+              Login to GeoSocial
+            </Header>
+            
+            {error && (
+              <Message error>
+                <Message.Header>Login Failed</Message.Header>
+                <p>{error}</p>
+              </Message>
+            )}
+            
+            <Form onSubmit={handleSubmit} loading={loading}>
+              <Form.Input
+                fluid
+                icon="user"
+                iconPosition="left"
+                placeholder="Username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+              <Form.Input
+                fluid
+                icon="lock"
+                iconPosition="left"
+                placeholder="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
               
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Username</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    disabled={loading}
-                  />
-                </Form.Group>
-
-                <div className="d-grid">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={loading}
-                  >
-                    {loading ? 'Logging in...' : 'Login'}
-                  </Button>
-                </div>
-              </Form>
-
-              <hr />
-              <div className="text-center">
-                <small className="text-muted">
-                  New to GeoSocial? Contact admin for account creation.
-                </small>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+              <Button 
+                color="blue" 
+                fluid 
+                size="large" 
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? 'Logging in...' : 'Login'}
+              </Button>
+            </Form>
+            
+            <Message>
+              New to GeoSocial? <Link to="/signup">Create an account</Link>
+            </Message>
+          </Segment>
+        </Grid.Column>
+      </Grid>
     </Container>
   );
 }

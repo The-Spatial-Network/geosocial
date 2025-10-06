@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Container, Grid, Card } from 'semantic-ui-react';
 import { useAuth } from '../hooks/useAuth';
 
 function ProfilePage() {

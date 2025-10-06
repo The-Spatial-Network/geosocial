@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.middleware.csrf import get_token
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
@@ -10,6 +11,11 @@ from geosocial.maps.models import Map
 class HomeView(TemplateView):
     """React SPA view - serves the React application for all frontend routes."""
     template_name = "react_app.html"
+    
+    def get(self, request, *args, **kwargs):
+        # Ensure CSRF cookie is set for the SPA
+        get_token(request)
+        return super().get(request, *args, **kwargs)
 
 
 # Function-based view alternative for simpler cases

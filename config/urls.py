@@ -8,6 +8,7 @@ from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
+from dj_rest_auth.registration.views import VerifyEmailView
 
 from geosocial.views import HomeView
 from config.auth_views import CustomObtainAuthToken
@@ -26,8 +27,13 @@ urlpatterns = [
 urlpatterns += [
     # API base url
     path("api/", include("config.api_router")),
-    # DRF auth token (CSRF exempt)
-    path("api/auth-token/", CustomObtainAuthToken.as_view(), name="obtain_auth_token"),
+    # dj-rest-auth endpoints for clean REST API authentication
+    path("api/auth/", include("dj_rest_auth.urls")),
+    path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
+    # Required for mandatory email verification
+    path("api/auth/registration/verify-email/", VerifyEmailView.as_view(), name="account_email_verification_sent"),
+    # Allauth headless API endpoints (keeping for now during transition)
+    path("_allauth/", include("allauth.headless.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path("api/docs/",
         SpectacularSwaggerView.as_view(url_name="api-schema"),
